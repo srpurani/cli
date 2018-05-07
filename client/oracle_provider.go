@@ -90,6 +90,7 @@ func NewCompartmentIDRoundTripper(compartmentID string, transport http.RoundTrip
 
 func (t CompartmentIDRoundTripper) RoundTrip(request *http.Request) (response *http.Response, e error) {
 	params := request.URL.Query()
+	request.Header.Set("opc-compartment-id", t.compartmentID)
 	params.Add("compartmentId", t.compartmentID)
 	request.URL.RawQuery = params.Encode()
 	response, e = t.transport.RoundTrip(request)

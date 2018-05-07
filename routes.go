@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"os"
 	"path"
@@ -55,6 +56,10 @@ var routeFlags = []cli.Flag{
 	cli.IntFlag{
 		Name:  "idle-timeout",
 		Usage: "route idle timeout (eg. 30)",
+	},
+	cli.StringFlag{
+		Name:  "annotations",
+		Usage: "cloud provider annotations file",
 	},
 }
 
@@ -309,6 +314,18 @@ func routeWithFlags(c *cli.Context, rt *fnmodels.Route) {
 	if len(rt.Config) == 0 {
 		if len(c.StringSlice("config")) > 0 {
 			rt.Config = extractEnvConfig(c.StringSlice("config"))
+		}
+	}
+	if len(rt.Annotations) == 0 {
+		if c.String("annotations") != "" {
+			b, err := ioutil.ReadFile(c.String("annotations"))
+			if err == nil {
+				annotations := make(map[string]interface{})
+				err = json.Unmarshal(b, &annotations)
+				if err == nil {
+					rt.Annotations = annotations
+				}
+			}
 		}
 	}
 }
